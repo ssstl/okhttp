@@ -40,6 +40,8 @@ import okhttp3.internal.platform.Platform;
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 import okio.ByteString;
 
+import static java.util.Arrays.asList;
+
 /**
  * DNS over HTTPS implementation.
  *
@@ -348,7 +350,7 @@ public class DnsOverHttps implements Dns {
     }
 
     public Builder bootstrapDnsHosts(InetAddress... bootstrapDnsHosts) {
-      return bootstrapDnsHosts(Arrays.asList(bootstrapDnsHosts));
+      return bootstrapDnsHosts(asList(bootstrapDnsHosts));
     }
 
     public Builder systemDns(Dns systemDns) {

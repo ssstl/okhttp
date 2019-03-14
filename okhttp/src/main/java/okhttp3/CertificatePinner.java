@@ -29,6 +29,8 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import okhttp3.internal.tls.CertificateChainCleaner;
 import okio.ByteString;
 
+import static java.util.Arrays.asList;
+
 /**
  * Constrains which certificates are trusted. Pinning certificates defends against attacks on
  * certificate authorities. It also prevents connections through man-in-the-middle certificate
@@ -207,7 +209,7 @@ public final class CertificatePinner {
   /** @deprecated replaced with {@link #check(String, List)}. */
   public void check(String hostname, Certificate... peerCertificates)
       throws SSLPeerUnverifiedException {
-    check(hostname, Arrays.asList(peerCertificates));
+    check(hostname, asList(peerCertificates));
   }
 
   /**

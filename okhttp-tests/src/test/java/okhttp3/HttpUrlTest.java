@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import okhttp3.UrlComponentEncodingTester.Component;
 import okhttp3.UrlComponentEncodingTester.Encoding;
 import org.junit.Ignore;
@@ -28,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -36,7 +36,7 @@ import static org.junit.Assert.fail;
 public final class HttpUrlTest {
   @Parameterized.Parameters(name = "Use get = {0}")
   public static Collection<Object[]> parameters() {
-    return Arrays.asList(
+    return asList(
         new Object[] { true },
         new Object[] { false }
     );
@@ -767,41 +767,33 @@ public final class HttpUrlTest {
   }
 
   @Test public void decodeSlashCharacterInDecodedPathSegment() {
-    assertThat(parse("http://host/a%2Fb%2Fc").pathSegments()).isEqualTo(
-        Arrays.asList("a/b/c"));
+    assertThat(parse("http://host/a%2Fb%2Fc").pathSegments()).containsExactly("a/b/c");
   }
 
   @Test public void decodeEmptyPathSegments() {
-    assertThat(parse("http://host/").pathSegments()).isEqualTo(Arrays.asList(""));
+    assertThat(parse("http://host/").pathSegments()).containsExactly("");
   }
 
   @Test public void percentDecode() throws Exception {
-    assertThat(parse("http://host/%00").pathSegments()).isEqualTo(Arrays.asList("\u0000"));
-    assertThat(parse("http://host/a/%E2%98%83/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "\u2603", "c"));
-    assertThat(parse("http://host/a/%F0%9F%8D%A9/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "\uD83C\uDF69", "c"));
-    assertThat(parse("http://host/a/%62/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "b", "c"));
-    assertThat(parse("http://host/a/%7A/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "z", "c"));
-    assertThat(parse("http://host/a/%7a/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "z", "c"));
+    assertThat(parse("http://host/%00").pathSegments()).containsExactly("\u0000");
+    assertThat(parse("http://host/a/%E2%98%83/c").pathSegments()).containsExactly("a", "\u2603", "c");
+    assertThat(parse("http://host/a/%F0%9F%8D%A9/c").pathSegments()).containsExactly("a", "\uD83C\uDF69", "c");
+    assertThat(parse("http://host/a/%62/c").pathSegments()).containsExactly("a", "b", "c");
+    assertThat(parse("http://host/a/%7A/c").pathSegments()).containsExactly("a", "z", "c");
+    assertThat(parse("http://host/a/%7a/c").pathSegments()).containsExactly("a", "z", "c");
   }
 
   @Test public void malformedPercentEncoding() {
-    assertThat(parse("http://host/a%f/b").pathSegments()).isEqualTo(
-        Arrays.asList("a%f", "b"));
-    assertThat(parse("http://host/%/b").pathSegments()).isEqualTo(Arrays.asList("%", "b"));
-    assertThat(parse("http://host/%").pathSegments()).isEqualTo(Arrays.asList("%"));
-    assertThat(parse("http://github.com/%%30%30").pathSegments()).isEqualTo(
-        Arrays.asList("%00"));
+    assertThat(parse("http://host/a%f/b").pathSegments()).containsExactly("a%f", "b");
+    assertThat(parse("http://host/%/b").pathSegments()).containsExactly("%", "b");
+    assertThat(parse("http://host/%").pathSegments()).containsExactly("%");
+    assertThat(parse("http://github.com/%%30%30").pathSegments()).containsExactly("%00");
   }
 
   @Test public void malformedUtf8Encoding() {
     // Replace a partial UTF-8 sequence with the Unicode replacement character.
-    assertThat(parse("http://host/a/%E2%98x/c").pathSegments()).isEqualTo(
-        Arrays.asList("a", "\ufffdx", "c"));
+    assertThat(parse("http://host/a/%E2%98x/c").pathSegments())
+        .containsExactly("a", "\ufffdx", "c");
   }
 
   @Test public void incompleteUrlComposition() throws Exception {
@@ -923,7 +915,7 @@ public final class HttpUrlTest {
     assertThat(url.scheme()).isEqualTo("http");
     assertThat(url.username()).isEqualTo("a:\u0001@/\\?#%b");
     assertThat(url.password()).isEqualTo("c:\u0001@/\\?#%d");
-    assertThat(url.pathSegments()).isEqualTo(Arrays.asList("g:\u0001@/\\?#%h"));
+    assertThat(url.pathSegments()).containsExactly("g:\u0001@/\\?#%h");
     assertThat(url.query()).isEqualTo("i:\u0001@/\\?#%j");
     assertThat(url.fragment()).isEqualTo("k:\u0001@/\\?#%l");
     assertThat(url.encodedUsername()).isEqualTo("a%3A%01%40%2F%5C%3F%23%25b");
@@ -950,7 +942,7 @@ public final class HttpUrlTest {
     assertThat(url.scheme()).isEqualTo("http");
     assertThat(url.username()).isEqualTo("a:\u0001@/\\?#%b");
     assertThat(url.password()).isEqualTo("c:\u0001@/\\?#%d");
-    assertThat(url.pathSegments()).isEqualTo(Arrays.asList("g:\u0001@/\\?#%h"));
+    assertThat(url.pathSegments()).containsExactly("g:\u0001@/\\?#%h");
     assertThat(url.query()).isEqualTo("i:\u0001@/\\?#%j");
     assertThat(url.fragment()).isEqualTo("k:\u0001@/\\?#%l");
     assertThat(url.encodedUsername()).isEqualTo("a%3A%01%40%2F%5C%3F%23%25b");
@@ -968,7 +960,7 @@ public final class HttpUrlTest {
         .build();
     assertThat(url.toString()).isEqualTo("http://host/a%2Fb/c");
     assertThat(url.encodedPath()).isEqualTo("/a%2Fb/c");
-    assertThat(url.pathSegments()).isEqualTo(Arrays.asList("a/b", "c"));
+    assertThat(url.pathSegments()).containsExactly("a/b", "c");
   }
 
   @Test public void composeMixingPathSegments() throws Exception {
@@ -981,9 +973,8 @@ public final class HttpUrlTest {
         .build();
     assertThat(url.toString()).isEqualTo("http://host/a%2fb/c/d%2525e/f%25g");
     assertThat(url.encodedPath()).isEqualTo("/a%2fb/c/d%2525e/f%25g");
-    assertThat(url.encodedPathSegments()).isEqualTo(
-        Arrays.asList("a%2fb", "c", "d%2525e", "f%25g"));
-    assertThat(url.pathSegments()).isEqualTo(Arrays.asList("a/b", "c", "d%25e", "f%g"));
+    assertThat(url.encodedPathSegments()).containsExactly("a%2fb", "c", "d%2525e", "f%25g");
+    assertThat(url.pathSegments()).containsExactly("a/b", "c", "d%25e", "f%g");
   }
 
   @Test public void composeWithAddSegment() throws Exception {
@@ -1256,7 +1247,7 @@ public final class HttpUrlTest {
         .removePathSegment(0)
         .removePathSegment(0)
         .build();
-    assertThat(url.pathSegments()).isEqualTo(Arrays.asList(""));
+    assertThat(url.pathSegments()).containsExactly("");
     assertThat(url.encodedPath()).isEqualTo("/");
   }
 
@@ -1565,8 +1556,7 @@ public final class HttpUrlTest {
         "http://host/?a%2B%3D%26%20b=c%2B%3D%26%20d&a%2B%3D%26%20b=e%2B%3D%26%20f");
     assertThat(url.querySize()).isEqualTo(2);
     assertThat(url.queryParameterNames()).isEqualTo(Collections.singleton("a+=& b"));
-    assertThat(url.queryParameterValues("a+=& b")).isEqualTo(
-        Arrays.asList("c+=& d", "e+=& f"));
+    assertThat(url.queryParameterValues("a+=& b")).containsExactly("c+=& d", "e+=& f");
   }
 
   @Test public void absentQueryIsZeroNameValuePairs() throws Exception {
@@ -1607,8 +1597,7 @@ public final class HttpUrlTest {
   @Test public void queryParametersWithoutValues() throws Exception {
     HttpUrl url = parse("http://host/?foo&bar&baz");
     assertThat(url.querySize()).isEqualTo(3);
-    assertThat(url.queryParameterNames()).isEqualTo(
-        new LinkedHashSet<>(Arrays.asList("foo", "bar", "baz")));
+    assertThat(url.queryParameterNames()).containsExactly("foo", "bar", "baz");
     assertThat(url.queryParameterValue(0)).isNull();
     assertThat(url.queryParameterValue(1)).isNull();
     assertThat(url.queryParameterValue(2)).isNull();
@@ -1620,8 +1609,7 @@ public final class HttpUrlTest {
   @Test public void queryParametersWithEmptyValues() throws Exception {
     HttpUrl url = parse("http://host/?foo=&bar=&baz=");
     assertThat(url.querySize()).isEqualTo(3);
-    assertThat(url.queryParameterNames()).isEqualTo(
-        new LinkedHashSet<>(Arrays.asList("foo", "bar", "baz")));
+    assertThat(url.queryParameterNames()).containsExactly("foo", "bar", "baz");
     assertThat(url.queryParameterValue(0)).isEqualTo("");
     assertThat(url.queryParameterValue(1)).isEqualTo("");
     assertThat(url.queryParameterValue(2)).isEqualTo("");
@@ -1637,7 +1625,7 @@ public final class HttpUrlTest {
     assertThat(url.queryParameterValue(0)).isEqualTo("1");
     assertThat(url.queryParameterValue(1)).isEqualTo("2");
     assertThat(url.queryParameterValue(2)).isEqualTo("3");
-    assertThat(url.queryParameterValues("foo[]")).isEqualTo(Arrays.asList("1", "2", "3"));
+    assertThat(url.queryParameterValues("foo[]")).containsExactly("1", "2", "3");
   }
 
   @Test public void queryParameterLookupWithNonCanonicalEncoding() throws Exception {
@@ -1681,7 +1669,7 @@ public final class HttpUrlTest {
     assertThat(url.encodedUsername()).isEqualTo("%6d%6D");
     assertThat(url.encodedPassword()).isEqualTo("%6d%6D");
     assertThat(url.encodedPath()).isEqualTo("/%6d%6D");
-    assertThat(url.encodedPathSegments()).isEqualTo(Arrays.asList("%6d%6D"));
+    assertThat(url.encodedPathSegments()).containsExactly("%6d%6D");
     assertThat(url.encodedQuery()).isEqualTo("%6d%6D");
     assertThat(url.encodedFragment()).isEqualTo("%6d%6D");
     assertThat(url.toString()).isEqualTo(urlString);

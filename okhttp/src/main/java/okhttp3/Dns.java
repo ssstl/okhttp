@@ -20,6 +20,8 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 /**
  * A domain name service that resolves IP addresses for host names. Most applications will use the
  * {@linkplain #SYSTEM system DNS service}, which is the default. Some applications may provide
@@ -36,7 +38,7 @@ public interface Dns {
   Dns SYSTEM = hostname -> {
     if (hostname == null) throw new UnknownHostException("hostname == null");
     try {
-      return Arrays.asList(InetAddress.getAllByName(hostname));
+      return asList(InetAddress.getAllByName(hostname));
     } catch (NullPointerException e) {
       UnknownHostException unknownHostException =
           new UnknownHostException("Broken system behaviour for dns lookup of " + hostname);
